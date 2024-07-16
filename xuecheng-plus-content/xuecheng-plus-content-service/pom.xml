@@ -23,6 +23,12 @@
             <artifactId>xuecheng-plus-content-model</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
+        <!--数据库-->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
