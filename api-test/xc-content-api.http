@@ -1,0 +1,9 @@
+###
+POST http://{{content_host}}/content/course/list
+Content-Type: application/json
+
+{
+  "auditStatus": "",
+  "courseName": "java",
+  "publishStatus": ""
+}
