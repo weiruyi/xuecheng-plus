@@ -5,7 +5,7 @@ import com.xuecheng.base.model.PageParams;
 import com.xuecheng.base.model.PageResult;
 import com.xuecheng.content.model.dto.QueryCourseParamsDTO;
 import com.xuecheng.content.model.po.CourseBase;
-import com.xuecheng.content.service.CourseBaseService;
+import com.xuecheng.content.service.CourseBaseInfoService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -23,18 +23,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CourseBaseInfoController {
 
-    private final CourseBaseService courseBaseService;
+    private final CourseBaseInfoService courseBaseInfoService;
 
     @ApiOperation("课程查询")
     @PostMapping("/course/list")
     public PageResult<CourseBase> list(PageParams pageParams,@RequestBody(required = false) QueryCourseParamsDTO queryCourseParamsDTO){
-        log.info("course");
-        CourseBase courseBase = courseBaseService.getById(1L);
-        log.info("courseBase:{}",courseBase);
-
-        List<CourseBase> courseBases = new ArrayList<>();
-        courseBases.add(courseBase);
-        PageResult<CourseBase> pageResult = new PageResult<CourseBase>(courseBases, 10, 1, 10);
-        return pageResult;
+        PageResult<CourseBase> courseBasePageResult = courseBaseInfoService.queryCourseBaseList(pageParams, queryCourseParamsDTO);
+        log.info("courseBasePageResult:{}", courseBasePageResult);
+        return courseBasePageResult;
     }
 }
