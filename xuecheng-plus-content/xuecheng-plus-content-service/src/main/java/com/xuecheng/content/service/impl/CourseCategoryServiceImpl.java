@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 public class CourseCategoryServiceImpl implements CourseCategoryService {
 
     private final CourseCategoryMapper courseCategoryMapper;
+
     @Override
     public List<CourseCategoryTreeDTO> queryTreeNodes(String id) {
         //1、获取种类集合
@@ -31,10 +32,10 @@ public class CourseCategoryServiceImpl implements CourseCategoryService {
             }
             CourseCategoryTreeDTO courseCategoryTreeDTO = treeDTOMap.get(item.getParentid());
             if(courseCategoryTreeDTO != null){
-                if(courseCategoryTreeDTO.getChildrenTreeNode() == null){
-                    courseCategoryTreeDTO.setChildrenTreeNode(new ArrayList<CourseCategoryTreeDTO>());
+                if(courseCategoryTreeDTO.getChildrenTreeNodes() == null){
+                    courseCategoryTreeDTO.setChildrenTreeNodes(new ArrayList<CourseCategoryTreeDTO>());
                 }
-                courseCategoryTreeDTO.getChildrenTreeNode().add(item);
+                courseCategoryTreeDTO.getChildrenTreeNodes().add(item);
             }
         });
         return courseCategoryTree;
