@@ -112,5 +112,4 @@ public class CourseBase implements Serializable {
      */
     private String status;
 
-
 }

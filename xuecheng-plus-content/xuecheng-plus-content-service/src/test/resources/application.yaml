@@ -1,9 +1,6 @@
-server:
-  servlet:
-    context-path: /content
-  port: 63040
-
 spring:
+  application:
+    name: content-service
   datasource:
     url: jdbc:mysql://49.234.52.192:3306/xc-content?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -25,19 +22,4 @@ logging:
   file:
     path: "logs/content-service"
 
-knife4j:
-  enable: true
-  openapi:
-    title: "学成在线内容管理系统"
-    description: "内容系统管理系统对课程相关信息进行管理"
-    email: ruyi_wei@hnu.edu.cn
-    concat: ruyi
-    url: https://weiruyi.github.io/
-    version: v1.0.0
-    group:
-      default:
-        group-name: default
-        api-rule: package
-        api-rule-resources:
-          - com.xuecheng.content.api
 

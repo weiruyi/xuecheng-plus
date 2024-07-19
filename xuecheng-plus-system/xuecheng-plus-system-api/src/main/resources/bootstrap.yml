@@ -1,0 +1,45 @@
+server:
+  servlet:
+    context-path: /system
+  port: 63110
+#微服务配置
+spring:
+  application:
+    name: system-api
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://49.234.52.192:3306/xc-system?serverTimezone=UTC&userUnicode=true&useSSL=false&
+    username: root
+    password: 123
+# 日志文件配置路径
+logging:
+  level:
+    com.xuecheng: debug
+  pattern:
+    dateformat: HH:mm:ss:SSS
+  file:
+    path: "logs/system-service"
+
+# swagger 文档配置
+swagger:
+  title: "学成在线系统管理"
+  description: "系统管理接口"
+  base-package: com.xuecheng.system
+  enabled: true
+  version: 1.0.0
+
+knife4j:
+  enable: true
+  openapi:
+    title: "学成在线系统管理系统"
+    description: "学成在线系统管理系统"
+    email: ruyi_wei@hnu.edu.cn
+    concat: ruyi
+    url: https://weiruyi.github.io/
+    version: v1.0.0
+    group:
+      default:
+        group-name: default
+        api-rule: package
+        api-rule-resources:
+          - com.xuecheng.system.api
