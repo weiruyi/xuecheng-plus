@@ -1,8 +1,10 @@
 package com.xuecheng.content.api;
 
 import com.xuecheng.content.model.dto.TeachplanDto;
+import com.xuecheng.content.service.TeachplanService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,14 +20,17 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/teachplan")
+@RequiredArgsConstructor
 public class TeachplanController {
+
+    private final TeachplanService teachplanService;
 
     //查询课程计划
     @ApiOperation("查询课程计划树形结构")
     @GetMapping("{courseId}/tree-nodes")
-    public List<TeachplanDto> getTreeNodes(@PathVariable("courseId") String courseId) {
-
-        return null;
+    public List<TeachplanDto> getTreeNodes(@PathVariable("courseId") Long courseId) {
+        List<TeachplanDto> treeNode = teachplanService.getTreeNode(courseId);
+        return treeNode;
     }
 
 }
