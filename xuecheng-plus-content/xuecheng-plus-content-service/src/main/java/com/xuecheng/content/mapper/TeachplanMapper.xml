@@ -27,4 +27,14 @@
         id, pname, parentid, grade, media_type, start_time, end_time, description, timelength, orderby, course_id, course_pub_id, status, is_preview, create_date, change_date
     </sql>
 
+    <select id="selectTreeNodes" resultType="com.xuecheng.content.model.dto.TeachplanDto"
+            parameterType="java.lang.Long">
+        with recursive t1 as (
+            select * from teachplan where parentid = 0 and course_id = #{courseId}
+            union all
+            select t2.* from teachplan t2 inner join t1 on t1.id = t2.parentid
+        )
+        select * from t1 order by t1.grade, t1.orderby;
+    </select>
+
 </mapper>
