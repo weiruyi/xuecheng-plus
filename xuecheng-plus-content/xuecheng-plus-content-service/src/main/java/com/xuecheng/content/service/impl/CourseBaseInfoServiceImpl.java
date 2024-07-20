@@ -5,16 +5,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xuecheng.base.exception.XueChengPlusException;
 import com.xuecheng.base.model.PageParams;
 import com.xuecheng.base.model.PageResult;
-import com.xuecheng.content.mapper.CourseBaseMapper;
-import com.xuecheng.content.mapper.CourseCategoryMapper;
-import com.xuecheng.content.mapper.CourseMarketMapper;
+import com.xuecheng.content.mapper.*;
 import com.xuecheng.content.model.dto.AddCourseDto;
 import com.xuecheng.content.model.dto.CourseBaseInfoDto;
 import com.xuecheng.content.model.dto.EditCourseDto;
 import com.xuecheng.content.model.dto.QueryCourseParamsDTO;
-import com.xuecheng.content.model.po.CourseBase;
-import com.xuecheng.content.model.po.CourseCategory;
-import com.xuecheng.content.model.po.CourseMarket;
+import com.xuecheng.content.model.po.*;
 import com.xuecheng.content.service.CourseBaseInfoService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +35,8 @@ public class CourseBaseInfoServiceImpl  implements CourseBaseInfoService {
     private final CourseBaseMapper courseBaseMapper;
     private final CourseMarketMapper courseMarketMapper;
     private final CourseCategoryMapper courseCategoryMapper;
+    private final TeachplanMapper teachplanMapper;
+    private final CourseTeacherMapper courseTeacherMapper;
 
     /*
      * @description 课程查询接口
@@ -216,6 +214,7 @@ public class CourseBaseInfoServiceImpl  implements CourseBaseInfoService {
      * @return
      */
     @Override
+    @Transactional
     public CourseBaseInfoDto updateCourseBaseInfo(Long companyId, EditCourseDto editCourseDto) {
         //课程id
         Long courseId = editCourseDto.getId();
@@ -243,6 +242,46 @@ public class CourseBaseInfoServiceImpl  implements CourseBaseInfoService {
         //查询课程基本信息
         CourseBaseInfoDto courseBaseInfoDto = getCourseBaseInfoById(courseId);
         return courseBaseInfoDto;
+    }
+
+    /**
+     * 删除课程信息
+     * @param id
+     * @param companyId
+     */
+    @Override
+    @Transactional
+    public void deleteCourse(Long id, Long companyId) {
+        //课程id
+        CourseBase courseBase = courseBaseMapper.selectById(id);
+        if(courseBase == null){
+            XueChengPlusException.cast("课程不存在");
+        }
+
+        //验证修改的是否是本机构的课程
+        if(!courseBase.getCompanyId().equals(companyId)){
+            XueChengPlusException.cast("本机构只能删除本机构的课程");
+        }
+
+        //课程审核状态为为提交才可以删除
+        if(!courseBase.getAuditStatus().equals("202002")){
+            XueChengPlusException.cast("课程的审核状态为未提交时方可删除");
+        }
+
+        //删除课程需要删除课程相关的基本信息、营销信息、课程计划、课程教师信息。
+        //课程基本信息
+        courseBaseMapper.deleteById(courseBase.getId());
+        //营销信息
+        courseMarketMapper.deleteById(courseBase.getId());
+        //课程计划
+        LambdaQueryWrapper<Teachplan> teachplanLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        teachplanLambdaQueryWrapper.eq(Teachplan::getCourseId, id);
+        teachplanMapper.delete(teachplanLambdaQueryWrapper);
+        //课程教师信息
+        LambdaQueryWrapper<CourseTeacher> courseTeacherLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        courseTeacherLambdaQueryWrapper.eq(CourseTeacher::getCourseId, id);
+        courseTeacherMapper.delete(courseTeacherLambdaQueryWrapper);
+
     }
 
 
