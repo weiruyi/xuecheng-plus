@@ -45,4 +45,18 @@ public class TeachplanController {
         teachplanService.deleteTeachplan(id);
     }
 
+    @ApiOperation("课程计划上移")
+    @PostMapping("moveup/{id}")
+    public void moveup(@PathVariable Long id){
+        log.info("向上移动课程计划，id={}",id);
+        teachplanService.changeOrderBy(id, true);
+    }
+
+    @ApiOperation("课程计划下移")
+    @PostMapping("movedown/{id}")
+    public void movedown(@PathVariable Long id){
+        log.info("向下移动课程计划，id={}",id);
+        teachplanService.changeOrderBy(id, false);
+    }
+
 }

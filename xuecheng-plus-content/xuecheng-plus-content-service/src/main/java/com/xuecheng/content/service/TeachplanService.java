@@ -29,4 +29,13 @@ public interface TeachplanService {
      */
     public void deleteTeachplan(Long id);
 
+    /**
+     * 课程计划向上或者向下移动
+     * @param id
+     * @param flag true为向上移动，false向下移动
+     */
+    void changeOrderBy(Long id, Boolean flag);
+
+
+
 }

@@ -146,4 +146,35 @@ public class TeachplanServiceImpl implements TeachplanService {
         Integer count = teachplanMapper.selectCount(queryWrapper);
         return count;
     }
+
+    /**
+     * 课程计划向上或者向下移动
+     * @param id
+     * @param flag true为向上移动，false向下移动
+     */
+    public void changeOrderBy(Long id, Boolean flag){
+        //1、查询出当前课程计划
+        Teachplan teachplan = teachplanMapper.selectById(id);
+
+        //2、查询出和当前课程计划相同课程，相同级别的，相邻的课程计划
+        //向上移动就-1，向下移动+1
+        Integer teachplanOrderBy = teachplan.getOrderby();
+        Integer nearOrderBy = flag ? teachplanOrderBy - 1 : teachplanOrderBy + 1;
+
+        //查询相邻的课程计划
+        LambdaQueryWrapper<Teachplan> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Teachplan::getCourseId, teachplan.getCourseId());
+        queryWrapper.eq(Teachplan::getParentid, teachplan.getParentid());
+        queryWrapper.eq(Teachplan::getOrderby, nearOrderBy);
+        Teachplan nearTeachplan = teachplanMapper.selectOne(queryWrapper);
+
+        //3、如果相邻的课程计划存在就交换
+        if(nearTeachplan != null){
+            teachplan.setOrderby(nearOrderBy);
+            teachplanMapper.updateById(teachplan);
+
+            nearTeachplan.setOrderby(teachplanOrderBy);
+            teachplanMapper.updateById(nearTeachplan);
+        }
+    }
 }
