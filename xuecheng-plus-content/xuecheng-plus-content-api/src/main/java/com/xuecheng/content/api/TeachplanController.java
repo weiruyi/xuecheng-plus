@@ -42,6 +42,7 @@ public class TeachplanController {
     @DeleteMapping("{id}")
     public void deleteTeachplan(@PathVariable Long id){
         log.info("删除课程计划,id=：{}",id);
+        teachplanService.deleteTeachplan(id);
     }
 
 }

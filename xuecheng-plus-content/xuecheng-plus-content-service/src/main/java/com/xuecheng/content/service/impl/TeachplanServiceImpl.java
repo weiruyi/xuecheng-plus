@@ -1,10 +1,13 @@
 package com.xuecheng.content.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.xuecheng.base.exception.XueChengPlusException;
 import com.xuecheng.content.mapper.TeachplanMapper;
+import com.xuecheng.content.mapper.TeachplanMediaMapper;
 import com.xuecheng.content.model.dto.SaveTeachplanDto;
 import com.xuecheng.content.model.dto.TeachplanDto;
 import com.xuecheng.content.model.po.Teachplan;
+import com.xuecheng.content.model.po.TeachplanMedia;
 import com.xuecheng.content.service.TeachplanService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +26,7 @@ import java.util.stream.Collectors;
 public class TeachplanServiceImpl implements TeachplanService {
 
     private final TeachplanMapper teachplanMapper;
+    private final TeachplanMediaMapper teachplanMediaMapper;
 
     /**
      * 查询课程计划树形结构
@@ -51,6 +55,10 @@ public class TeachplanServiceImpl implements TeachplanService {
         return teachplanDtoList;
     }
 
+    /**
+     * 新增或者修改课程计划
+     * @param teachplanDto  课程计划信息
+     */
     @Transactional
     @Override
     public void saveTeachplan(SaveTeachplanDto teachplanDto) {
@@ -75,6 +83,62 @@ public class TeachplanServiceImpl implements TeachplanService {
 
     }
 
+    /**
+     * 根据id删除课程计划
+     * @param id
+     */
+    @Override
+    @Transactional
+    public void deleteTeachplan(Long id) {
+        //1、判断是否是大章节
+        Teachplan teachplan = teachplanMapper.selectById(id);
+        if(teachplan.getParentid() == 0 && teachplan.getGrade() == 1){
+            //2、大章节
+            //2.1、如果还有子信息则无法删除
+            //2.1.1 统计以当前计划为父计划的计划数
+            LambdaQueryWrapper<Teachplan> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Teachplan::getParentid, id);
+            Integer count = teachplanMapper.selectCount(queryWrapper);
+            //2.2 如果不为0则无法删除
+            if(count > 0){
+                XueChengPlusException exception = new XueChengPlusException("课程计划信息还有子级信息，无法操作");
+                throw  exception;
+            }
+            //2.3、没有小章节，直接删除
+            teachplanMapper.deleteById(id);
+        }
+        //3、小章节
+        LambdaQueryWrapper<TeachplanMedia> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TeachplanMedia::getTeachplanId, id);
+        TeachplanMedia teachplanMedia = teachplanMediaMapper.selectOne(queryWrapper);
+        if(teachplanMedia != null){
+            teachplanMediaMapper.deleteById(teachplanMedia.getId());
+        }
+        teachplanMapper.deleteById(id);
+
+        //4、修改大于的编号
+        LambdaQueryWrapper<Teachplan> teachplanLambdaWrapper = new LambdaQueryWrapper<>();
+        teachplanLambdaWrapper.gt(Teachplan::getOrderby, teachplan.getOrderby());
+        teachplanLambdaWrapper.eq(Teachplan::getCourseId, teachplan.getCourseId());
+        teachplanLambdaWrapper.eq(Teachplan::getParentid, teachplan.getParentid());
+        List<Teachplan> teachplanList = teachplanMapper.selectList(teachplanLambdaWrapper);
+
+        //所有编号减1
+        if(teachplanList != null && teachplanList.size() > 0){
+            teachplanList.stream().forEach(item -> {
+                item.setOrderby(item.getOrderby() - 1);
+                teachplanMapper.updateById(item);
+            });
+        }
+
+    }
+
+    /**
+     * 根据courseId和parentId查询课程数量
+     * @param courseId
+     * @param parentId
+     * @return
+     */
     private Integer getTeachplanCount(Long courseId, Long parentId){
         LambdaQueryWrapper<Teachplan> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Teachplan::getCourseId, courseId);
