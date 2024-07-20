@@ -24,10 +24,17 @@ Content-Type: application/json
   "mt": "1-1",
   "st": "1-1-1",
   "name": "",
-  "pic": "",
+  "pic": "123",
   "teachmode": "200002",
-  "users": "初级人员",
+  "users": "1",
   "tags": "",
   "grade": "204001",
   "description": ""
 }
+
+
+### 查询课程
+GET {{content_host}}/content/course/93
+
+###
+GET {{content_host}}/content/teachplan/74/tree-nodes

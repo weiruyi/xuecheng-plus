@@ -3,7 +3,7 @@
 <mapper namespace="com.xuecheng.content.mapper.TeachplanMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.xuecheng.content.model.po.Teachplan">
+    <resultMap id="treeNodeResultMap" type="com.xuecheng.content.model.dto.TeachplanDto">
         <id column="id" property="id" />
         <result column="pname" property="pname" />
         <result column="parentid" property="parentid" />
@@ -20,11 +20,32 @@
         <result column="is_preview" property="isPreview" />
         <result column="create_date" property="createDate" />
         <result column="change_date" property="changeDate" />
+        <association property="teachplanMedia" javaType="com.xuecheng.content.model.po.TeachplanMedia">
+            <result column="teachplanMeidaId"   property="id" />
+            <result column="mediaFilename"   property="mediaFilename" />
+            <result column="mediaId"   property="mediaId" />
+            <result column="id"   property="teachplanId" />
+            <result column="course_id"   property="courseId" />
+        </association>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
         id, pname, parentid, grade, media_type, start_time, end_time, description, timelength, orderby, course_id, course_pub_id, status, is_preview, create_date, change_date
     </sql>
+
+    <select id="selectTreeNodes" resultMap="treeNodeResultMap"
+            parameterType="java.lang.Long">
+        with recursive t1 as (
+            select * from teachplan where parentid = 0 and course_id = #{courseId}
+            union all
+            select t2.* from teachplan t2 inner join t1 on t1.id = t2.parentid
+        )
+        select t1.*,m1.media_fileName mediaFilename,
+               m1.id teachplanMeidaId,
+               m1.media_id mediaId
+        from t1 left join teachplan_media m1
+                          on t1.id = m1.teachplan_id  order by t1.grade, t1.orderby;
+    </select>
 
 </mapper>
