@@ -1,6 +1,8 @@
+
+
 spring:
   application:
-    name: system-service
+    name: content-api
   cloud:
     nacos:
       server-addr: 49.234.52.192:8848
@@ -12,11 +14,12 @@ spring:
         group: xc
         file-extension: yaml
         refresh-enabled: true
+        extension-configs:
+          - data-id: content-service-${spring.profiles.active}.yaml
+            group: xc
+            refresh: true
         shared-configs:
           - data-id: shared-log-${spring.profiles.active}.yaml
-            group: xc-common
-            refresh: true
-          - data-id: shared-db-${spring.profiles.active}.yaml
             group: xc-common
             refresh: true
           - data-id: shared-swagger-${spring.profiles.active}.yaml
@@ -26,10 +29,7 @@ spring:
   profiles:
     active: dev
 
-
 xc:
   swagger:
-    title: 系统管理接口文档
-    package: com.xuecheng.system
-  db:
-    database: xc-system
+    title: 内容管理接口文档
+    package: com.xuecheng.content.api
