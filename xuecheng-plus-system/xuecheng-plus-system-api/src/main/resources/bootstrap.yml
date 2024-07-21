@@ -10,7 +10,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://49.234.52.192:3306/xc-system?serverTimezone=UTC&userUnicode=true&useSSL=false&
     username: root
-    password: 123
+    password: wry123
 # 日志文件配置路径
 logging:
   level:
