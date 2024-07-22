@@ -29,5 +29,5 @@ spring:
 
 xc:
   swagger:
-    title: 内容管理接口文档
-    package: com.xuecheng.content.api
+    title: 媒资管理接口文档
+    package: com.xuecheng.media.api
