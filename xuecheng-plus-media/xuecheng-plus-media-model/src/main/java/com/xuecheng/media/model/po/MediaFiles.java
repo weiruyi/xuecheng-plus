@@ -22,7 +22,7 @@ public class MediaFiles implements Serializable {
     /**
      * 主键
      */
-    @TableId(value = "id", type = IdType.ASSIGN_ID)
+    @TableId(value = "id", type = IdType.INPUT)
     private String id;
 
     /**
