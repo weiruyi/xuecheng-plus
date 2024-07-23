@@ -35,4 +35,14 @@ public interface MediaFileService {
      public UploadFileResultDto uploadFile(Long companyId, UploadFileParamDto uploadFileParamDto, String localFilePath);
 
 
+    /**
+     * 将文件信息保存到数据库
+     * @param companyId
+     * @param uploadFileParamDto
+     * @param fileMd5
+     * @param bucket
+     * @param objectName
+     * @return
+     */
+    public MediaFiles addMediaFIlesToDb(Long companyId, UploadFileParamDto uploadFileParamDto, String fileMd5, String bucket, String objectName);
 }

@@ -18,6 +18,7 @@ import io.minio.UploadObjectArgs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -168,8 +169,9 @@ public class MediaFileServiceImpl implements MediaFileService {
             if(!result){
                 XueChengPlusException.cast("上传文件失败");
             }
-            //2、将文件信息保存到数据库
-            mediaFiles = addMediaFIlesToDb(companyId, uploadFileParamDto, fileMd5, bucket_mediafiles, objectName);
+            //2、将文件信息保存到数据库,获取代理对象，否则事务会失效
+            MediaFileServiceImpl currentProxy = (MediaFileServiceImpl) AopContext.currentProxy();
+            mediaFiles = currentProxy.addMediaFIlesToDb(companyId, uploadFileParamDto, fileMd5, bucket_mediafiles, objectName);
             if(mediaFiles == null){
                 XueChengPlusException.cast("文件上传后保存信息失败");
             }
@@ -192,6 +194,7 @@ public class MediaFileServiceImpl implements MediaFileService {
      * @param objectName
      * @return
      */
+    @Override
     @Transactional
     public MediaFiles addMediaFIlesToDb(Long companyId, UploadFileParamDto uploadFileParamDto, String fileMd5, String bucket, String objectName) {
         MediaFiles mediaFiles = mediaFilesMapper.selectById(fileMd5);
@@ -220,10 +223,10 @@ public class MediaFileServiceImpl implements MediaFileService {
             //插入数据
             int insert = mediaFilesMapper.insert(mediaFiles);
             if(insert <= 0){
-                log.debug("向数据库保存文件失败,bucket:{}, objectName:{}", bucket, objectName);
-                return null;
+                log.debug("向数据库保存文件失败,mediaFiles:{}",mediaFiles);
+                XueChengPlusException.cast("保存文件信息失败");
             }
-            return mediaFiles;
+            log.debug("保存文件信息成功,mediaFiles:{}",mediaFiles);
         }
         return mediaFiles;
 
