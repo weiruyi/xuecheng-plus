@@ -4,10 +4,7 @@ package com.xuecheng.media;
 import com.alibaba.cloud.commons.io.IOUtils;
 import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
-import io.minio.GetObjectArgs;
-import io.minio.MinioClient;
-import io.minio.RemoveObjectArgs;
-import io.minio.UploadObjectArgs;
+import io.minio.*;
 import io.minio.errors.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -17,6 +14,8 @@ import org.springframework.http.MediaType;
 import java.io.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 public class MinioTest {
@@ -83,6 +82,49 @@ public class MinioTest {
             System.out.println("下载失败");
         }
     }
+
+    //将分块文件上传到minio
+    @Test
+    public void uploadChunck() throws Exception {
+        for (int i = 0; i < 3; i++) {
+            //上传文件的参数信息
+            UploadObjectArgs uploadObjectArgs = UploadObjectArgs.builder()
+                    .bucket("testbucket")
+                    .filename("D:\\hnu\\video\\chunk\\" +i)
+                    .object("chunk/" + i)
+                    .build();
+
+
+            //上传文件
+            minioClient.uploadObject(uploadObjectArgs);
+
+            System.out.println("上传分块" + i + "成功");
+
+        }
+    }
+
+    //调用minio接口合并分块
+    @Test
+    public void testMerge() throws Exception{
+        List<ComposeSource> sources = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            //指定分块文件信息
+            ComposeSource composeSource = ComposeSource.builder().bucket("testbucket").object("chunk/" + i).build();
+            sources.add(composeSource);
+        }
+
+        //指定合并后的文件信息
+        ComposeObjectArgs composeObjectArgs = ComposeObjectArgs.builder()
+                .bucket("testbucket")
+                .object("merge01.mp4")
+                .sources(sources)
+                .build();
+
+        //minio合并文件，minio默认的分块大小为5M
+        minioClient.composeObject(composeObjectArgs);
+    }
+
+    //批量清理文件
 
 
 
