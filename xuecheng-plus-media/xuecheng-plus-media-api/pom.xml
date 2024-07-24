@@ -3,20 +3,34 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>xuecheng-plus-system</artifactId>
+        <artifactId>xuecheng-plus-media</artifactId>
         <groupId>com.xuecheng</groupId>
         <version>1.0.0</version>
     </parent>
-    <artifactId>xuecheng-plus-system-api</artifactId>
-    <name>xuecheng-plus-system-api</name>
-    <description>xuecheng-plus-system-api</description>
+    <artifactId>xuecheng-plus-media-api</artifactId>
+    <name>xuecheng-plus-media-api</name>
+    <description>xuecheng-plus-media-api</description>
 
     <dependencies>
         <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.xuecheng</groupId>
-            <artifactId>xuecheng-plus-system-service</artifactId>
+            <artifactId>xuecheng-plus-media-model</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.xuecheng</groupId>
+            <artifactId>xuecheng-plus-media-service</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!--web-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -26,20 +40,6 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-        </dependency>
-        <!--读取bootstrap文件-->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-bootstrap</artifactId>
-        </dependency>
-        <!--nacos 服务注册发现-->
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
 
 

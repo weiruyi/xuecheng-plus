@@ -34,7 +34,7 @@ Content-Type: application/json
 
 
 ### 查询课程
-GET {{content_host}}/content/course/93
+GET {{gateway_host}}/content/course/93
 
 ###
-GET {{content_host}}/content/teachplan/74/tree-nodes
+GET {{gateway_host}}/content/teachplan/74/tree-nodes
