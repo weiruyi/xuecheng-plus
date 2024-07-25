@@ -6,6 +6,8 @@ import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
 import io.minio.*;
 import io.minio.errors.*;
+import io.minio.messages.DeleteError;
+import io.minio.messages.DeleteObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.Test;
@@ -16,14 +18,16 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 public class MinioTest {
 
     MinioClient minioClient =
             MinioClient.builder()
-                    .endpoint("http://49.234.52.192:9000")
-                    .credentials("minio", "wry@0312.")
+                    .endpoint("http://192.168.175.129:9000")
+                    .credentials("minio", "...")
                     .build();
 
     @Test
@@ -125,6 +129,35 @@ public class MinioTest {
     }
 
     //批量清理文件
+    @Test
+    public void clearChunkFiles(){
+        String chunkFolderPath = "e/7/e714cf46e423840ed0d5cbc4d288a40b/chunk/";
+        int chunkTotal = 4;
+        log.info("开始清理分块");
+        Iterable<DeleteObject> objects = Stream.iterate(0, i -> ++i)
+                .limit(chunkTotal)
+                .map(i -> new DeleteObject(chunkFolderPath.concat(Integer.toString(i))))
+                .collect(Collectors.toList());
+
+        RemoveObjectsArgs removeObjectsArgs = RemoveObjectsArgs.builder()
+                .bucket("video")
+                .objects(objects)
+                .build();
+
+        Iterable<Result<DeleteError>> results = minioClient.removeObjects(removeObjectsArgs);
+        //要想真正删除
+
+        try {
+            for (Result<DeleteError> item : results) {
+                DeleteError deleteError = item.get();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("分块清理失败");
+        }
+        System.out.println("分块清理完成！");
+
+    }
 
 
 

@@ -1,5 +1,6 @@
 package com.xuecheng.media;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +16,7 @@ import java.util.List;
 /**
  * 测试分块上传
  */
+@Slf4j
 public class BigFileTest {
 
 	//分块
