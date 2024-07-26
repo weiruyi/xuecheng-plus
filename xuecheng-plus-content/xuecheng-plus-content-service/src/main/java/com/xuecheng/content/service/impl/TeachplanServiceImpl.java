@@ -219,4 +219,17 @@ public class TeachplanServiceImpl implements TeachplanService {
 
         return teachplanMedia;
     }
+
+    /**
+     * 教学计划解除绑定
+     * @param teachPlanId
+     * @param mediaId
+     */
+    @Override
+    public void unassociationMedia(Long teachPlanId, String mediaId){
+        LambdaQueryWrapper<TeachplanMedia> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(TeachplanMedia::getTeachplanId, teachPlanId);
+        wrapper.eq(TeachplanMedia::getMediaId, mediaId);
+        teachplanMediaMapper.delete(wrapper);
+    }
 }
