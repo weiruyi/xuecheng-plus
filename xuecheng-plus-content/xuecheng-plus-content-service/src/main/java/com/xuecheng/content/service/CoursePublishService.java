@@ -10,4 +10,11 @@ public interface CoursePublishService {
 	 * @return
 	 */
 	public CoursePreviewDto getCoursePreviewInfo(Long courseId);
+
+	/**
+	 * 课程提交审核
+	 * @param companyId
+	 * @param courseId
+	 */
+	public void commitAudit(Long companyId, Long courseId);
 }
