@@ -550,4 +550,13 @@ public class MediaFileServiceImpl implements MediaFileService {
 
     }
 
+    /**
+     * 根据id获取媒资信息
+     * @param id
+     * @return
+     */
+    public MediaFiles getFileById(String id){
+        return mediaFilesMapper.selectById(id);
+    }
+
 }

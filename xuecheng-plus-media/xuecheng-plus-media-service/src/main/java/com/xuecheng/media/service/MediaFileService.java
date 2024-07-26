@@ -106,4 +106,11 @@ public interface MediaFileService {
      * @return
      */
     public boolean addMediaFilesToMinio(String localFilePath, String mimeType, String bucket, String objectName);
+
+    /**
+     * 根据id获取媒资信息
+     * @param id
+     * @return
+     */
+    public MediaFiles getFileById(String id);
 }
