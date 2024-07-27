@@ -52,4 +52,9 @@ public class MultipartSupportConfig {
         }
         return new CommonsMultipartFile(item);
     }
+
+//    @Bean
+//    public RestTemplate restTemplate() {
+//        return new RestTemplate();
+//    }
 }

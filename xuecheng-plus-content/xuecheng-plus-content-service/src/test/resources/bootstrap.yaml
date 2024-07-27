@@ -6,8 +6,11 @@ spring:
   cloud:
     nacos:
       server-addr: 49.234.52.192:8848
+      discovery:
+        namespace: xc-${spring.profiles.active}
+        group: xc
       config:  # 配置文件
-        namespace: xc-dev
+        namespace: xc-${spring.profiles.active}
         group: xc
         file-extension: yaml
         refresh-enabled: true

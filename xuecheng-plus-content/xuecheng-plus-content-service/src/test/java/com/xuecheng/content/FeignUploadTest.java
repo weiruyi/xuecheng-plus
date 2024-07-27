@@ -22,6 +22,6 @@ public class FeignUploadTest {
 		File file = new File("/Users/lance/Downloads/1.html");
 		MultipartFile multipartFile = MultipartSupportConfig.getMultipartFile(file);
 
-		mediaServiceClient.uploadFile(multipartFile, "course/11.html");
+		mediaServiceClient.uploadFile(multipartFile, "course/13.html");
 	}
 }
