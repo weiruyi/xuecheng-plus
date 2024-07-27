@@ -168,7 +168,7 @@ public class MediaFileServiceImpl implements MediaFileService {
      * @return
      */
     @Override
-    public UploadFileResultDto uploadFile(Long companyId, UploadFileParamDto uploadFileParamDto, String localFilePath) {
+    public UploadFileResultDto uploadFile(Long companyId, UploadFileParamDto uploadFileParamDto, String localFilePath, String objectName) {
 
         //1、将文件上传到minio
         //文件名
@@ -182,7 +182,9 @@ public class MediaFileServiceImpl implements MediaFileService {
         String defaultFolderPath = getDefaultFolderPath();
         //文件的md5值
         String fileMd5 = getFileMd5(new File(localFilePath));
-        String objectName = defaultFolderPath + fileMd5 + extention;
+        if(objectName == null){
+            objectName = defaultFolderPath + fileMd5 + extention;
+        }
         //判断是否存在
         MediaFiles mediaFiles = mediaFilesMapper.selectById(fileMd5);
         if(mediaFiles == null){

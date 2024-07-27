@@ -15,6 +15,9 @@ spring:
           - data-id: shared-log-${spring.profiles.active}.yaml
             group: xc-common
             refresh: true
+          - data-id: feign-${spring.profiles.active}.yaml
+            group: xc-common
+            refresh: true
 
   profiles:
     active: dev

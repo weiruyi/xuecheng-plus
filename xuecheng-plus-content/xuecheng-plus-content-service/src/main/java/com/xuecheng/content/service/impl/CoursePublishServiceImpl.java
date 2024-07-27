@@ -2,26 +2,28 @@ package com.xuecheng.content.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.xuecheng.base.exception.CommonError;
 import com.xuecheng.base.exception.XueChengPlusException;
 import com.xuecheng.content.mapper.CourseBaseMapper;
 import com.xuecheng.content.mapper.CourseMarketMapper;
+import com.xuecheng.content.mapper.CoursePublishMapper;
 import com.xuecheng.content.mapper.CoursePublishPreMapper;
 import com.xuecheng.content.model.dto.CourseBaseInfoDto;
 import com.xuecheng.content.model.dto.CoursePreviewDto;
 import com.xuecheng.content.model.dto.TeachplanDto;
-import com.xuecheng.content.model.po.CourseBase;
-import com.xuecheng.content.model.po.CourseMarket;
-import com.xuecheng.content.model.po.CoursePublishPre;
-import com.xuecheng.content.model.po.CourseTeacher;
+import com.xuecheng.content.model.po.*;
 import com.xuecheng.content.service.CourseBaseInfoService;
 import com.xuecheng.content.service.CoursePublishService;
 import com.xuecheng.content.service.CourseTeacherService;
 import com.xuecheng.content.service.TeachplanService;
+import com.xuecheng.messagesdk.model.po.MqMessage;
+import com.xuecheng.messagesdk.service.MqMessageService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,6 +43,10 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 	private CoursePublishPreMapper coursePublishPreMapper;
 	@Autowired
 	private CourseBaseMapper courseBaseMapper;
+	@Autowired
+	private CoursePublishMapper coursePublishMapper;
+	@Autowired
+	private MqMessageService mqMessageService;
 
 	/**
 	 * 获取课程预览信息
@@ -66,6 +72,7 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 	 * @param courseId
 	 */
 	@Override
+	@Transactional
 	public void commitAudit(Long companyId, Long courseId){
 		//课程基本信息
 		CourseBaseInfoDto courseBaseInfoDto = courseBaseInfoService.getCourseBaseInfoById(courseId);
@@ -135,5 +142,59 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 		courseBaseWrapper.eq(CourseBase::getId, courseId);
 		courseBaseMapper.update(courseBase, courseBaseWrapper);
 
+	}
+
+
+	/**
+	 * @description 课程发布接口
+	 * @param companyId 机构id
+	 * @param courseId 课程id
+	 * @return void
+	 */
+	@Override
+	@Transactional
+	public void publish(Long companyId,Long courseId){
+		//查询课程预发布信息
+		CoursePublishPre coursePublishPre = coursePublishPreMapper.selectById(courseId);
+		if(coursePublishPre == null){
+			XueChengPlusException.cast("请先提交课程审核，审核通过才能发布");
+		}
+		if(!coursePublishPre.getCompanyId().equals(companyId)){
+			XueChengPlusException.cast("不允许提交其他机构的课程");
+		}
+		String status = coursePublishPre.getStatus();
+		if(!status.equals("202004")){
+			XueChengPlusException.cast("审核未通过，不允许发布");
+		}
+
+		//向课程发布表写入数据
+		CoursePublish coursePublish = new CoursePublish();
+		BeanUtils.copyProperties(coursePublishPre, coursePublish);
+		//先查询课程发布
+		CoursePublish coursePublishObj = coursePublishMapper.selectById(courseId);
+		if(coursePublishObj == null){
+			coursePublishMapper.insert(coursePublish);
+		}else {
+			coursePublishMapper.updateById(coursePublish);
+		}
+
+		//向消息表写入数据
+		saveCoursePublishMessage(courseId);
+
+		//将预发布表删除
+		coursePublishPreMapper.deleteById(courseId);
+
+	}
+
+	/**
+	 * @description 保存消息表记录
+	 * @param courseId  课程id
+	 * @return void
+	 */
+	private void saveCoursePublishMessage(Long courseId){
+		MqMessage mqMessage = mqMessageService.addMessage("course_publish", String.valueOf(courseId), null, null);
+		if(mqMessage==null){
+			XueChengPlusException.cast(CommonError.UNKOWN_ERROR);
+		}
 	}
 }
