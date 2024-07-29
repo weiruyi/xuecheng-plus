@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xuecheng.base.exception.CommonError;
 import com.xuecheng.base.exception.XueChengPlusException;
+import com.xuecheng.content.config.MultipartSupportConfig;
+import com.xuecheng.content.feignClient.MediaServiceClient;
 import com.xuecheng.content.mapper.CourseBaseMapper;
 import com.xuecheng.content.mapper.CourseMarketMapper;
 import com.xuecheng.content.mapper.CoursePublishMapper;
@@ -18,14 +20,23 @@ import com.xuecheng.content.service.CourseTeacherService;
 import com.xuecheng.content.service.TeachplanService;
 import com.xuecheng.messagesdk.model.po.MqMessage;
 import com.xuecheng.messagesdk.service.MqMessageService;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -47,6 +58,8 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 	private CoursePublishMapper coursePublishMapper;
 	@Autowired
 	private MqMessageService mqMessageService;
+	@Autowired
+	private MediaServiceClient mediaServiceClient;
 
 	/**
 	 * 获取课程预览信息
@@ -184,6 +197,74 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 		//将预发布表删除
 		coursePublishPreMapper.deleteById(courseId);
 
+		//修改课程基本信息为已发布
+		CourseBase courseBase = new CourseBase();
+		courseBase.setStatus("203002");
+		LambdaQueryWrapper<CourseBase> courseBaseWrapper = new LambdaQueryWrapper<>();
+		courseBaseWrapper.eq(CourseBase::getId, courseId);
+		courseBaseMapper.update(courseBase, courseBaseWrapper);
+
+	}
+
+	/**
+	 * 课程页面静态化
+	 * @param courseId
+	 * @return
+	 */
+	@Override
+	public File generateCourseHtml(Long courseId) {
+		Configuration configuration = null;
+		File htmlFile = null;
+
+		try {
+			configuration = new Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
+			//拿到calsspath
+			String classpath = this.getClass().getResource("/").getPath();
+			//指定模版目录
+			configuration.setDirectoryForTemplateLoading(new File(classpath + "/templates/"));
+			//指定编码
+			configuration.setDefaultEncoding("UTF-8");
+			//得到模版
+			Template template = configuration.getTemplate("course_template.ftl");
+			//准备数据
+			CoursePreviewDto coursePreviewInfo = getCoursePreviewInfo(courseId);
+			HashMap<String, Object> map =  new HashMap<>();
+			map.put("model", coursePreviewInfo);
+
+			String html = FreeMarkerTemplateUtils.processTemplateIntoString(template, map);
+
+			//输入流
+			InputStream inputStream = IOUtils.toInputStream(html, "utf-8");
+			//输出文件
+			htmlFile = File.createTempFile("coursepublish", ".html");
+			FileOutputStream fileOutputStream = new FileOutputStream(htmlFile);
+			IOUtils.copy(inputStream, fileOutputStream);
+		} catch (Exception e) {
+			log.error("页面静态化出现问题，courseId={}", courseId);
+			e.printStackTrace();
+		}
+		return htmlFile;
+	}
+
+	/**
+	 * 上传课程静态化页面
+	 * @param courseId
+	 * @param courseHtml
+	 */
+	@Override
+	public void uploadCourseHtml(Long courseId, File courseHtml) {
+		try {
+			//将file类型转成multipartFile
+			MultipartFile multipartFile = MultipartSupportConfig.getMultipartFile(courseHtml);
+			String upload = mediaServiceClient.uploadFile(multipartFile, "course/" + courseId + ".html");
+			if(upload == null){
+				log.debug("远程调用走了降级逻辑，返回结果为空， 课程id={}",courseId);
+				XueChengPlusException.cast("上传静态文件过程中存在异常");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			XueChengPlusException.cast("上传静态文件过程中存在异常");
+		}
 	}
 
 	/**

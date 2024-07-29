@@ -199,10 +199,8 @@ public class MediaFileServiceImpl implements MediaFileService {
             if(mediaFiles == null){
                 XueChengPlusException.cast("文件上传后保存信息失败");
             }
-        }
-        if(!mediaFiles.getCompanyId().equals(companyId)){
-            log.info("其他公司已经上传过该资源");
-            XueChengPlusException.cast("其他公司已经上传过该资源");
+        }else {
+            log.debug("该文件已经存在，fileMd5={}", fileMd5);
         }
         UploadFileResultDto uploadFileResultDto = new UploadFileResultDto();
         BeanUtils.copyProperties(mediaFiles, uploadFileResultDto);

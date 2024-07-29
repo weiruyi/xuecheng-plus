@@ -1,18 +1,36 @@
 package com.xuecheng.content.service.jonHandler;
 
 
+import com.xuecheng.base.exception.XueChengPlusException;
+import com.xuecheng.content.feignClient.CourseIndex;
+import com.xuecheng.content.feignClient.SearchServiceClient;
+import com.xuecheng.content.mapper.CoursePublishMapper;
+import com.xuecheng.content.model.po.CoursePublish;
+import com.xuecheng.content.service.CoursePublishService;
 import com.xuecheng.messagesdk.model.po.MqMessage;
 import com.xuecheng.messagesdk.service.MessageProcessAbstract;
 import com.xuecheng.messagesdk.service.MqMessageService;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.io.File;
 
 
 @Slf4j
 @Component
 public class CoursePublishTask extends MessageProcessAbstract {
+
+	@Autowired
+	private CoursePublishService coursePublishService;
+	@Autowired
+	private SearchServiceClient searchServiceClient;
+	@Autowired
+	private CoursePublishMapper coursePublishMapper;
+
 
 	/**
 	 * 任务调度入口
@@ -42,10 +60,10 @@ public class CoursePublishTask extends MessageProcessAbstract {
 		//向redis写缓存
 		saveCourseCache(mqMessage, courseId);
 		//返回true表示任务完成
-		return false;
+		return true;
 	}
 
-	//生成课程静态化页面并上传文件系统
+	//生成课程静态化页面并上传minio文件系统
 	private void generateCourseHtml(MqMessage mqMessage, Long courseId) {
 		Long taskId = mqMessage.getId();
 		MqMessageService mqMessageService = this.getMqMessageService();
@@ -58,10 +76,18 @@ public class CoursePublishTask extends MessageProcessAbstract {
 		}
 
 		//开始进行课程静态化
-		int i= 1/0;
+		//生成静态化页面
+		File file = coursePublishService.generateCourseHtml(courseId);
+		//上传静态化页面
+		if(file!=null){
+			coursePublishService.uploadCourseHtml(courseId,file);
+		}else {
+			XueChengPlusException.cast("生成页面出错");
+		}
 
 		//更改任务状态为已完成
 		mqMessageService.completedStageOne(taskId);
+		log.debug("页面静态化完成");
 	}
 
 	//保存索引信息
@@ -77,6 +103,14 @@ public class CoursePublishTask extends MessageProcessAbstract {
 		}
 
 		//开始向ES写入数据，调用搜索服务
+		CoursePublish coursePublish = coursePublishMapper.selectById(courseId);
+
+		CourseIndex courseIndex = new CourseIndex();
+		BeanUtils.copyProperties(coursePublish, courseIndex);
+		Boolean add = searchServiceClient.add(courseIndex);
+		if(!add){
+			XueChengPlusException.cast("远程调用添加课程索引失败");
+		}
 
 
 		//保存完成信息

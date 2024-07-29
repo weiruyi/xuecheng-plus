@@ -20,9 +20,6 @@ public class FreemarkerController {
 	@GetMapping("/testfreemarker")
 	public ModelAndView test(){
 		ModelAndView modelAndView = new ModelAndView();
-		String path = this.getClass().getResource("/").getPath();
-		System.out.println("-----------------");
-		System.out.println(path);
 		//设置模型数据
 		modelAndView.addObject("name","小明");
 		//设置模板名称
