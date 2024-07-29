@@ -150,6 +150,7 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 		//修改课程审核状态为已提交
 		CourseBase courseBase = new CourseBase();
 		courseBase.setAuditStatus("202003");
+		courseBase.setStatus("203001");
 		courseBase.setChangeDate(LocalDateTime.now());
 		LambdaQueryWrapper<CourseBase> courseBaseWrapper = new LambdaQueryWrapper<>();
 		courseBaseWrapper.eq(CourseBase::getId, courseId);
