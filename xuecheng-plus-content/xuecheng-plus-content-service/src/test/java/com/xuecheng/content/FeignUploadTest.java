@@ -18,8 +18,8 @@ public class FeignUploadTest {
 	@Test
 	public void test() {
 		//将file类型转成multipartFile
-//		File file = new File("D:\\hnu\\html\\1.html");
-		File file = new File("/Users/lance/Downloads/1.html");
+		File file = new File("D:\\hnu\\html\\1.html");
+//		File file = new File("/Users/lance/Downloads/1.html");
 		MultipartFile multipartFile = MultipartSupportConfig.getMultipartFile(file);
 
 		mediaServiceClient.uploadFile(multipartFile, "course/13.html");
