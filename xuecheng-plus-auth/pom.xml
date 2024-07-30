@@ -21,11 +21,12 @@
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
         <!--完成SpringMVC自动装配-->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <scope>provided</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework</groupId>-->
+<!--            <artifactId>spring-webmvc</artifactId>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
+
         <!--web-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
