@@ -39,5 +39,11 @@ GET {{gateway_host}}/content/course/93
 ###
 GET {{gateway_host}}/content/teachplan/74/tree-nodes
 
-###
+###授权码模式
 POST {{auth_host}}/auth/oauth/token?client_id=XcWebApp&client_secret=XcWebApp&grant_type=authorization_code&code=8R119O&redirect_uri=http://www.51xuecheng.cn
+
+###密码模式
+POST {{auth_host}}/auth/oauth/token?client_id=XcWebApp&client_secret=XcWebApp&grant_type=password&username=zhangsan&password=123
+
+### 校验jwt令牌
+POST {{auth_host}}/auth/oauth/check_token?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsieHVlY2hlbmctcGx1cyJdLCJ1c2VyX25hbWUiOiJ6aGFuZ3NhbiIsInNjb3BlIjpbImFsbCJdLCJleHAiOjE3MjIzMjIzODgsImF1dGhvcml0aWVzIjpbInAxIl0sImp0aSI6IjdiMDcyMjYyLTMzMDItNDNjZi1hMzE2LTlhYTkxY2YxYTEyZSIsImNsaWVudF9pZCI6IlhjV2ViQXBwIn0.HWhB8de3udZU_r8kIKdHOaQo4_JaPpZN7KcO2tfj5Fg
