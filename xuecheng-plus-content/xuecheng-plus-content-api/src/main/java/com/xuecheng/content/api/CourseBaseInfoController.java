@@ -9,10 +9,12 @@ import com.xuecheng.content.model.dto.EditCourseDto;
 import com.xuecheng.content.model.dto.QueryCourseParamsDTO;
 import com.xuecheng.content.model.po.CourseBase;
 import com.xuecheng.content.service.CourseBaseInfoService;
+import com.xuecheng.content.utils.SecurityUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,7 +48,10 @@ public class CourseBaseInfoController {
     @GetMapping("/{id}")
     public CourseBaseInfoDto getCourseBaseById(@PathVariable Long id){
         log.info("根据id查询课程信息");
-
+//        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//        System.out.println(principal);
+        SecurityUtil.XcUser user = SecurityUtil.getUser();
+        System.out.println(user);
         CourseBaseInfoDto courseBaseInfo = courseBaseInfoService.getCourseBaseInfoById(id);
         return courseBaseInfo;
     }
@@ -56,6 +61,7 @@ public class CourseBaseInfoController {
     public CourseBaseInfoDto updateCourseBase(@RequestBody @Validated EditCourseDto editCourseDto){
         log.info("修改课程信息：{}", editCourseDto);
         //TODO：companyId
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long companyId = 1232141425L;
         CourseBaseInfoDto courseBaseInfoDto = courseBaseInfoService.updateCourseBaseInfo(companyId, editCourseDto);
         return courseBaseInfoDto;

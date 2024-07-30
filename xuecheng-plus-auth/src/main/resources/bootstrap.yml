@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: auth-service
+  cloud:
+    nacos:
+      server-addr: 49.234.52.192:8848
+      discovery:
+        namespace: xc-dev
+        group: xc
+      config:
+        namespace: xc-dev
+        group: xc
+        file-extension: yaml
+        refresh-enabled: true
+        shared-configs:
+          - data-id: shared-log-${spring.profiles.active}.yaml
+            group: xc-common
+            refresh: true
+          - data-id: shared-swagger-${spring.profiles.active}.yaml
+            group: xc-common
+            refresh: true
+
+  profiles:
+    active: dev
+
+xc:
+  swagger:
+    title: 登录管理接口文档
+    package: com.xuecheng.auth.controller

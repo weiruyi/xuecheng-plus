@@ -28,6 +28,7 @@
         <hutool.version>5.8.11</hutool.version>
         <mysql.version>8.0.23</mysql.version>
         <elasticsearch.version>7.11.1</elasticsearch.version>
+        <swagger-spring-boot-starter.version>1.9.0.RELEASE</swagger-spring-boot-starter.version>
     </properties>
 
     <!-- 对依赖包进行管理 -->
