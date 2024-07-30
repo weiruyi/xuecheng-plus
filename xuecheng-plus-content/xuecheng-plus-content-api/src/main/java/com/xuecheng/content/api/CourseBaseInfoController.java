@@ -9,6 +9,7 @@ import com.xuecheng.content.model.dto.EditCourseDto;
 import com.xuecheng.content.model.dto.QueryCourseParamsDTO;
 import com.xuecheng.content.model.po.CourseBase;
 import com.xuecheng.content.service.CourseBaseInfoService;
+import com.xuecheng.content.utils.SecurityUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -47,8 +48,10 @@ public class CourseBaseInfoController {
     @GetMapping("/{id}")
     public CourseBaseInfoDto getCourseBaseById(@PathVariable Long id){
         log.info("根据id查询课程信息");
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        System.out.println(principal);
+//        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//        System.out.println(principal);
+        SecurityUtil.XcUser user = SecurityUtil.getUser();
+        System.out.println(user);
         CourseBaseInfoDto courseBaseInfo = courseBaseInfoService.getCourseBaseInfoById(id);
         return courseBaseInfo;
     }
