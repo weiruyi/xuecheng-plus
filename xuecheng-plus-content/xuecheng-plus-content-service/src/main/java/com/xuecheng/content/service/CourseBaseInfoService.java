@@ -19,7 +19,7 @@ public interface CourseBaseInfoService  {
      * @param queryCourseParamsDto 条件条件
      * @return com.xuecheng.base.model.PageResult<com.xuecheng.content.model.po.CourseBase>
      */
-    PageResult<CourseBase> queryCourseBaseList(PageParams pageParams, QueryCourseParamsDTO queryCourseParamsDto);
+    PageResult<CourseBase> queryCourseBaseList(Long companyId,PageParams pageParams, QueryCourseParamsDTO queryCourseParamsDto);
 
     /**
      * 新增课程

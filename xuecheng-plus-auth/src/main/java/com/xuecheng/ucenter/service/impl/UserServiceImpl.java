@@ -1,9 +1,11 @@
 package com.xuecheng.ucenter.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.xuecheng.ucenter.mapper.XcMenuMapper;
 import com.xuecheng.ucenter.mapper.XcUserMapper;
 import com.xuecheng.ucenter.model.dto.AuthParamsDto;
 import com.xuecheng.ucenter.model.dto.XcUserExt;
+import com.xuecheng.ucenter.model.po.XcMenu;
 import com.xuecheng.ucenter.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -13,15 +15,18 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Component
 public class UserServiceImpl implements UserDetailsService {
 	@Autowired
 	private XcUserMapper xcUserMapper;
-//	@Autowired
-//	private AuthService aUthService;
 	@Autowired
 	private ApplicationContext applicationContext;
+	@Autowired
+	private XcMenuMapper xcMenuMapper;
 
 	@Override
 	public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
@@ -50,6 +55,16 @@ public class UserServiceImpl implements UserDetailsService {
 	public UserDetails getUserPrincipal(XcUserExt user){
 		//用户权限,如果不加报Cannot pass a null GrantedAuthority collection
 		String[] authorities = {"p1"};
+		//查询用户权限
+		List<XcMenu> xcMenus = xcMenuMapper.selectPermissionByUserId(user.getId());
+		if(xcMenus.size() > 0){
+			List<String> permissions = new ArrayList<>();
+			xcMenus.forEach(xcMenu -> {
+				//拿到用户权限标识符
+				permissions.add(xcMenu.getCode());
+			});
+			authorities = permissions.toArray(new String[0]);
+		}
 		String password = user.getPassword();
 		//为了安全在令牌中不放密码
 		user.setPassword(null);

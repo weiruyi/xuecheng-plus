@@ -45,7 +45,7 @@ public class CourseBaseInfoServiceImpl  implements CourseBaseInfoService {
      * @return com.xuecheng.base.model.PageResult<com.xuecheng.content.model.po.CourseBase>
      */
     @Override
-    public PageResult<CourseBase> queryCourseBaseList(PageParams pageParams, QueryCourseParamsDTO queryCourseParamsDto) {
+    public PageResult<CourseBase> queryCourseBaseList(Long companyId, PageParams pageParams, QueryCourseParamsDTO queryCourseParamsDto) {
         //构建查询条件对象
         LambdaQueryWrapper<CourseBase> queryWrapper = new LambdaQueryWrapper<>();
         //构建查询条件，根据课程名称查询
@@ -54,6 +54,8 @@ public class CourseBaseInfoServiceImpl  implements CourseBaseInfoService {
         queryWrapper.eq(StringUtils.isNotEmpty(queryCourseParamsDto.getAuditStatus()),CourseBase::getAuditStatus,queryCourseParamsDto.getAuditStatus());
         //构建查询条件，根据课程发布状态查询
         queryWrapper.eq(StringUtils.isNotEmpty(queryCourseParamsDto.getPublishStatus()), CourseBase::getStatus,queryCourseParamsDto.getPublishStatus());
+        //课程id
+        queryWrapper.eq(CourseBase::getCompanyId, companyId);
 
         //分页对象
         Page<CourseBase> page = new Page<>(pageParams.getPageNo(), pageParams.getPageSize());
