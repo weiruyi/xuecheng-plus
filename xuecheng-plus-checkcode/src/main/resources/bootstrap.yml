@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: checkcode
+  cloud:
+    nacos:
+      server-addr: 49.234.52.192:8848
+      discovery:
+        namespace: xc-dev
+        group: xc
+      config:
+        namespace: xc-dev
+        group: xc
+        file-extension: yaml
+        refresh-enabled: true
+        shared-configs:
+          - data-id: shared-log-${spring.profiles.active}.yaml
+            group: xc-common
+            refresh: true
+          - data-id: shared-swagger-${spring.profiles.active}.yaml
+            group: xc-common
+            refresh: true
+          - data-id: redis-${spring.profiles.active}.yaml
+            group: xc-common
+            refresh: true
+
+  profiles:
+    active: dev
