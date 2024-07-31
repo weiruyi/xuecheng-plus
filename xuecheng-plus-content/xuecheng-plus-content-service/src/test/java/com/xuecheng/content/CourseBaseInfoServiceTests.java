@@ -29,7 +29,7 @@ class CourseBaseInfoServiceTests {
         pageParams.setPageNo(1L);//页码
         pageParams.setPageSize(3L);//每页记录数
 
-        PageResult<CourseBase> courseBasePageResult = courseBaseInfoService.queryCourseBaseList(pageParams, queryCourseParamsDto);
+        PageResult<CourseBase> courseBasePageResult = courseBaseInfoService.queryCourseBaseList(null, pageParams, queryCourseParamsDto);
         System.out.println(courseBasePageResult);
     }
 

@@ -1,9 +1,11 @@
 package com.xuecheng.ucenter.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.xuecheng.ucenter.mapper.XcMenuMapper;
 import com.xuecheng.ucenter.mapper.XcUserMapper;
 import com.xuecheng.ucenter.model.dto.AuthParamsDto;
 import com.xuecheng.ucenter.model.dto.XcUserExt;
+import com.xuecheng.ucenter.model.po.XcMenu;
 import com.xuecheng.ucenter.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -13,15 +15,18 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Component
 public class UserServiceImpl implements UserDetailsService {
 	@Autowired
 	private XcUserMapper xcUserMapper;
-//	@Autowired
-//	private AuthService aUthService;
 	@Autowired
 	private ApplicationContext applicationContext;
+	@Autowired
+	private XcMenuMapper xcMenuMapper;
 
 	@Override
 	public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
@@ -40,23 +45,6 @@ public class UserServiceImpl implements UserDetailsService {
 		XcUserExt user = authService.execute(authParamsDto);
 		return getUserPrincipal(user);
 
-//		String username = authParamsDto.getUsername();
-//		//根据username查询数据库
-//		XcUser xcUser = xcUserMapper.selectOne(new LambdaQueryWrapper<XcUser>().eq(XcUser::getUsername, username));
-//		//查询到用户不存在，返回NUll
-//		if (xcUser == null) {
-//			return null;
-//		}
-//
-//		//查询到了用户，拿到正确的密码，最终封装成UserDetails对象给spring security框架返回，由框架进行密码解析
-//		String password = xcUser.getPassword();
-//		//权限
-//		String[] authorities = {"test"};
-//		//将用户信息转json
-//		xcUser.setPassword(null);
-//		String userJson = JSON.toJSONString(xcUser);
-//		UserDetails userDetails = User.withUsername(userJson).password(password).authorities(authorities).build();
-//		return userDetails;
 	}
 
 	/**
@@ -67,6 +55,16 @@ public class UserServiceImpl implements UserDetailsService {
 	public UserDetails getUserPrincipal(XcUserExt user){
 		//用户权限,如果不加报Cannot pass a null GrantedAuthority collection
 		String[] authorities = {"p1"};
+		//查询用户权限
+		List<XcMenu> xcMenus = xcMenuMapper.selectPermissionByUserId(user.getId());
+		if(xcMenus.size() > 0){
+			List<String> permissions = new ArrayList<>();
+			xcMenus.forEach(xcMenu -> {
+				//拿到用户权限标识符
+				permissions.add(xcMenu.getCode());
+			});
+			authorities = permissions.toArray(new String[0]);
+		}
 		String password = user.getPassword();
 		//为了安全在令牌中不放密码
 		user.setPassword(null);
