@@ -40,23 +40,6 @@ public class UserServiceImpl implements UserDetailsService {
 		XcUserExt user = authService.execute(authParamsDto);
 		return getUserPrincipal(user);
 
-//		String username = authParamsDto.getUsername();
-//		//根据username查询数据库
-//		XcUser xcUser = xcUserMapper.selectOne(new LambdaQueryWrapper<XcUser>().eq(XcUser::getUsername, username));
-//		//查询到用户不存在，返回NUll
-//		if (xcUser == null) {
-//			return null;
-//		}
-//
-//		//查询到了用户，拿到正确的密码，最终封装成UserDetails对象给spring security框架返回，由框架进行密码解析
-//		String password = xcUser.getPassword();
-//		//权限
-//		String[] authorities = {"test"};
-//		//将用户信息转json
-//		xcUser.setPassword(null);
-//		String userJson = JSON.toJSONString(xcUser);
-//		UserDetails userDetails = User.withUsername(userJson).password(password).authorities(authorities).build();
-//		return userDetails;
 	}
 
 	/**
