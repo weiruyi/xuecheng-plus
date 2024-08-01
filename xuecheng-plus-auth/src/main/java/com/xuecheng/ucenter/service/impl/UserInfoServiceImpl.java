@@ -4,15 +4,21 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xuecheng.base.exception.XueChengPlusException;
 import com.xuecheng.ucenter.feignclient.CheckCodeClient;
 import com.xuecheng.ucenter.mapper.XcUserMapper;
+import com.xuecheng.ucenter.mapper.XcUserRoleMapper;
 import com.xuecheng.ucenter.model.dto.FindpasswordParamsDto;
 import com.xuecheng.ucenter.model.dto.RegisterparamsDto;
 import com.xuecheng.ucenter.model.po.XcUser;
+import com.xuecheng.ucenter.model.po.XcUserRole;
 import com.xuecheng.ucenter.service.UserInfoService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 
 @Service
@@ -24,6 +30,8 @@ public class UserInfoServiceImpl implements UserInfoService {
 	private XcUserMapper xcUserMapper;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	@Autowired
+	private XcUserRoleMapper xcUserRoleMapper;
 
 	/**
 	 * 找回密码操作
@@ -71,6 +79,7 @@ public class UserInfoServiceImpl implements UserInfoService {
 	 * 注册
 	 * @param registerparamsDto
 	 */
+	@Transactional
 	@Override
 	public void register(RegisterparamsDto registerparamsDto){
 		//1、校验验证码，如果不一致则抛出异常
@@ -100,5 +109,20 @@ public class UserInfoServiceImpl implements UserInfoService {
 		//密码加密
 		String encode = passwordEncoder.encode(registerparamsDto.getPassword());
 		xcUser.setPassword(encode);
+		//id使用uuid
+		String id = UUID.randomUUID().toString();
+		xcUser.setId(id);
+		xcUser.setName("学生" + id);
+		xcUser.setUtype("101001");
+		xcUser.setStatus("1");
+		xcUser.setCreateTime(LocalDateTime.now());
+		xcUserMapper.insert(xcUser);
+		//4.1用户角色授权表
+		XcUserRole xcUserRole = new XcUserRole();
+		xcUserRole.setId(UUID.randomUUID().toString());
+		xcUserRole.setUserId(id);
+		xcUserRole.setRoleId("17"); //学生
+		xcUserRole.setCreateTime(LocalDateTime.now());
+		xcUserRoleMapper.insert(xcUserRole);
 	}
 }

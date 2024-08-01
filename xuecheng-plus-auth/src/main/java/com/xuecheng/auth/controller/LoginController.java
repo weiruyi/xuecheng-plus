@@ -64,7 +64,7 @@ public class LoginController {
     @PostMapping("/register")
     public void register(@RequestBody RegisterparamsDto registerparamsDto){
         log.info("注册操作");
-
+        userInfoService.register(registerparamsDto);
     }
 
 
