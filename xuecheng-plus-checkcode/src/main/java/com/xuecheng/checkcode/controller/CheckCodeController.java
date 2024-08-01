@@ -1,6 +1,5 @@
 package com.xuecheng.checkcode.controller;
 
-import com.xuecheng.base.model.RestResponse;
 import com.xuecheng.checkcode.model.CheckCodeParamsDto;
 import com.xuecheng.checkcode.model.CheckCodeResultDto;
 import com.xuecheng.checkcode.service.CheckCodeService;
@@ -8,11 +7,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.util.Map;
 
 /**
  * @author Mr.M
@@ -22,6 +21,7 @@ import java.util.Map;
  */
 @Api(value = "验证码服务接口")
 @RestController
+@Slf4j
 public class CheckCodeController {
 
     @Resource(name = "PicCheckCodeService")
@@ -32,6 +32,17 @@ public class CheckCodeController {
     @PostMapping(value = "/pic")
     public CheckCodeResultDto generatePicCheckCode(CheckCodeParamsDto checkCodeParamsDto){
         return picCheckCodeService.generate(checkCodeParamsDto);
+    }
+
+    /**
+     * 生成手机或者邮箱验证码
+     * @param param1
+     * @return
+     */
+    @PostMapping("/phone")
+    public CheckCodeResultDto generatePhoneCheckCode(String param1){
+        log.info("模拟给手机或者邮箱发送验证码");
+        return picCheckCodeService.generate(new CheckCodeParamsDto());
     }
 
     @ApiOperation(value="校验", notes="校验")

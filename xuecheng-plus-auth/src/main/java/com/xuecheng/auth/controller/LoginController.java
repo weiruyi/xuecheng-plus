@@ -1,13 +1,14 @@
 package com.xuecheng.auth.controller;
 
 import com.xuecheng.ucenter.mapper.XcUserMapper;
+import com.xuecheng.ucenter.model.dto.FindpasswordParamsDto;
+import com.xuecheng.ucenter.model.dto.RegisterparamsDto;
 import com.xuecheng.ucenter.model.po.XcUser;
+import com.xuecheng.ucenter.service.UserInfoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author Mr.M
@@ -21,6 +22,8 @@ public class LoginController {
 
     @Autowired
     XcUserMapper userMapper;
+    @Autowired
+    private UserInfoService userInfoService;
 
 
     @RequestMapping("/login-success")
@@ -48,6 +51,21 @@ public class LoginController {
         return "访问r2资源";
     }
 
+    /**
+     * 找回密码
+     * @param findpasswordParamsDto
+     */
+    @PostMapping("/findpassword")
+    public void findpassword(@RequestBody FindpasswordParamsDto findpasswordParamsDto) {
+        log.info("找回密码操作");
+        userInfoService.findPassword(findpasswordParamsDto);
+    }
+
+    @PostMapping("/register")
+    public void register(@RequestBody RegisterparamsDto registerparamsDto){
+        log.info("注册操作");
+        userInfoService.register(registerparamsDto);
+    }
 
 
 }
