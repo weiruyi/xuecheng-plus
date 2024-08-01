@@ -2,6 +2,7 @@ package com.xuecheng.auth.controller;
 
 import com.xuecheng.ucenter.mapper.XcUserMapper;
 import com.xuecheng.ucenter.model.dto.FindpasswordParamsDto;
+import com.xuecheng.ucenter.model.dto.RegisterparamsDto;
 import com.xuecheng.ucenter.model.po.XcUser;
 import com.xuecheng.ucenter.service.UserInfoService;
 import lombok.extern.slf4j.Slf4j;
@@ -50,10 +51,21 @@ public class LoginController {
         return "访问r2资源";
     }
 
+    /**
+     * 找回密码
+     * @param findpasswordParamsDto
+     */
     @PostMapping("/findpassword")
     public void findpassword(@RequestBody FindpasswordParamsDto findpasswordParamsDto) {
         log.info("找回密码操作");
         userInfoService.findPassword(findpasswordParamsDto);
     }
+
+    @PostMapping("/register")
+    public void register(@RequestBody RegisterparamsDto registerparamsDto){
+        log.info("注册操作");
+
+    }
+
 
 }

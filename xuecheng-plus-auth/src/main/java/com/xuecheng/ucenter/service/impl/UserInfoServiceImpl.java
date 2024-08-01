@@ -5,9 +5,11 @@ import com.xuecheng.base.exception.XueChengPlusException;
 import com.xuecheng.ucenter.feignclient.CheckCodeClient;
 import com.xuecheng.ucenter.mapper.XcUserMapper;
 import com.xuecheng.ucenter.model.dto.FindpasswordParamsDto;
+import com.xuecheng.ucenter.model.dto.RegisterparamsDto;
 import com.xuecheng.ucenter.model.po.XcUser;
 import com.xuecheng.ucenter.service.UserInfoService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ public class UserInfoServiceImpl implements UserInfoService {
 	 * 找回密码操作
 	 * @param findpasswordParamsDto
 	 */
+	@Override
 	public void findPassword(FindpasswordParamsDto findpasswordParamsDto){
 		//1、校验验证码是否正确
 		//获取用户输入的验证码以及key
@@ -62,5 +65,40 @@ public class UserInfoServiceImpl implements UserInfoService {
 		String encode = passwordEncoder.encode(password);
 		xcUser.setPassword(encode);
 		xcUserMapper.updateById(xcUser);
+	}
+
+	/**
+	 * 注册
+	 * @param registerparamsDto
+	 */
+	@Override
+	public void register(RegisterparamsDto registerparamsDto){
+		//1、校验验证码，如果不一致则抛出异常
+		String checkcodekey = registerparamsDto.getCheckcodekey();
+		String checkcode = registerparamsDto.getCheckcode();
+		Boolean verify = checkCodeClient.verify(checkcodekey, checkcode);
+		if(!verify){
+			XueChengPlusException.cast("验证码输入错误");
+		}
+		//2、校验两次密码是否一致，如果不一致则抛出异常
+		String password = registerparamsDto.getPassword();
+		String confirmpwd = registerparamsDto.getConfirmpwd();
+		if(!password.equals(confirmpwd))
+			XueChengPlusException.cast("两次密码输入不一致");
+		//3、校验用户是否存在，如果存在则抛出异常
+		String username = registerparamsDto.getUsername();
+		LambdaQueryWrapper<XcUser> queryWrapper = new LambdaQueryWrapper<>();
+		queryWrapper.eq(XcUser::getUsername, username);
+		XcUser xcUserDb = xcUserMapper.selectOne(queryWrapper);
+		if(xcUserDb!=null){
+			XueChengPlusException.cast("当前用户已存在，请重新输入用户名");
+		}
+		//4、向用户表、用户角色关系表添加数据。角色为学生角色。
+		//4.1用户表
+		XcUser xcUser = new XcUser();
+		BeanUtils.copyProperties(registerparamsDto, xcUser);
+		//密码加密
+		String encode = passwordEncoder.encode(registerparamsDto.getPassword());
+		xcUser.setPassword(encode);
 	}
 }
