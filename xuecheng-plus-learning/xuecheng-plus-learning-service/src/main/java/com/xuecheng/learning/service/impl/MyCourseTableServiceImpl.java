@@ -195,8 +195,6 @@ public class MyCourseTableServiceImpl implements MyCourseTableService {
 	 * @param userId
 	 * @param courseId
 	 * @return com.xuecheng.learning.model.po.XcCourseTables
-	 * @author Mr.M
-	 * @date 2022/10/2 17:07
 	 */
 	public XcCourseTables getXcCourseTables(String userId,Long courseId){
 		XcCourseTables xcCourseTables = xcCourseTablesMapper.selectOne(new LambdaQueryWrapper<XcCourseTables>().eq(XcCourseTables::getUserId, userId).eq(XcCourseTables::getCourseId, courseId));
@@ -204,5 +202,44 @@ public class MyCourseTableServiceImpl implements MyCourseTableService {
 
 	}
 
+
+	/**
+	 * 保存选课成功
+	 * @param chooseCourseId
+	 * @return
+	 */
+	@Override
+	public boolean saveChooseCourseSuccess(String chooseCourseId){
+
+		//根据choosecourseId查询选课记录
+		XcChooseCourse xcChooseCourse = xcChooseCourseMapper.selectById(chooseCourseId);
+		if(xcChooseCourse == null){
+			log.debug("收到支付结果通知没有查询到关联的选课记录,choosecourseId:{}",chooseCourseId);
+			return false;
+		}
+		String status = xcChooseCourse.getStatus();
+		if("701001".equals(status)){
+			//添加到课程表
+			addCourseTable(xcChooseCourse);
+			return true;
+		}
+		//待支付状态才处理
+		if ("701002".equals(status)) {
+			//更新为选课成功
+			xcChooseCourse.setStatus("701001");
+			int update = xcChooseCourseMapper.updateById(xcChooseCourse);
+			if(update>0){
+				log.debug("收到支付结果通知处理成功,选课记录:{}",xcChooseCourse);
+				//添加到课程表
+				addCourseTable(xcChooseCourse);
+				return true;
+			}else{
+				log.debug("收到支付结果通知处理失败,选课记录:{}",xcChooseCourse);
+				return false;
+			}
+		}
+
+		return false;
+	}
 
 }
