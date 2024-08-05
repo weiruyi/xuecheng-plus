@@ -66,7 +66,13 @@ public class MyCourseTablesController {
     @ApiOperation("我的课程表")
     @GetMapping("/mycoursetable")
     public PageResult<XcCourseTables> mycoursetable(MyCourseTableParams params) {
-        return null;
+        //用户id
+        SecurityUtil.XcUser user = SecurityUtil.getUser();
+        String userId = user.getId();
+        params.setUserId(userId);
+
+        PageResult<XcCourseTables> result = myCourseTableService.mycourseTables(params);
+        return result;
     }
 
 }

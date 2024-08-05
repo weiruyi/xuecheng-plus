@@ -1,6 +1,7 @@
 package com.xuecheng.learning.feignclient;
 
 import com.xuecheng.content.model.po.CoursePublish;
+import com.xuecheng.content.model.po.Teachplan;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.openfeign.FallbackFactory;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,12 @@ public class ContentServiceClientFallbackFactory implements FallbackFactory<Cont
             @Override
             public CoursePublish getCoursepublish(Long courseId) {
                 log.error("调用内容管理服务发生熔断:{}", throwable.toString(),throwable);
+                return null;
+            }
+
+            @Override
+            public Teachplan getTeachPlanByCourseId(Long courseId, Long teachplanId) {
+                log.error("调用内容管理服务查询课程计划发生熔断");
                 return null;
             }
         };

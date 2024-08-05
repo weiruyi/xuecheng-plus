@@ -1,8 +1,11 @@
 package com.xuecheng.content.api;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.xuecheng.content.mapper.TeachplanMapper;
 import com.xuecheng.content.model.dto.BindTeachplanMediaDto;
 import com.xuecheng.content.model.dto.SaveTeachplanDto;
 import com.xuecheng.content.model.dto.TeachplanDto;
+import com.xuecheng.content.model.po.Teachplan;
 import com.xuecheng.content.service.TeachplanService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -23,6 +26,7 @@ import java.util.List;
 public class TeachplanController {
 
     private final TeachplanService teachplanService;
+    private final TeachplanMapper teachplanMapper;
 
     //查询课程计划
     @ApiOperation("查询课程计划树形结构")
@@ -73,6 +77,14 @@ public class TeachplanController {
         log.info("课程和媒资关系解除绑定，teachPlanId={},mediaId={}",teachPlanId,mediaId);
         teachplanService.unassociationMedia(teachPlanId, mediaId);
 
+    }
+
+    @GetMapping("/{courseId}/{teachplanId}")
+    public Teachplan getTeachPlanByCourseId(@PathVariable("courseId") Long courseId, @PathVariable("teachplanId") Long teachplanId){
+        Teachplan teachplan = teachplanMapper.selectOne(new LambdaQueryWrapper<Teachplan>()
+                .eq(Teachplan::getCourseId, courseId)
+                .eq(Teachplan::getId, teachplanId));
+        return teachplan;
     }
 
 }

@@ -1,21 +1,23 @@
 package com.xuecheng.content.api;
 
+import com.alibaba.fastjson.JSON;
+import com.xuecheng.content.model.dto.CourseBaseInfoDto;
 import com.xuecheng.content.model.dto.CoursePreviewDto;
+import com.xuecheng.content.model.dto.TeachplanDto;
 import com.xuecheng.content.model.po.CoursePublish;
 import com.xuecheng.content.service.CoursePublishService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.util.List;
 
 
 @Slf4j
-@Controller
+@RestController
 public class CoursePublishController {
 	@Autowired
 	private CoursePublishService coursePublishService;
@@ -33,7 +35,6 @@ public class CoursePublishController {
 		return modelAndView;
 	}
 
-	@ResponseBody
 	@PostMapping("/courseaudit/commit/{courseId}")
 	public void commitAudit(@PathVariable("courseId") Long courseId){
 		log.info("提交审核，courseId={}", courseId);
@@ -42,7 +43,7 @@ public class CoursePublishController {
 		coursePublishService.commitAudit(companyId, courseId);
 	}
 
-	@ResponseBody
+
 	@PostMapping("/coursepublish/{courseId}")
 	public void coursepublish(@PathVariable("courseId") Long courseId){
 		log.info("课程发布，courseId={}", courseId);
@@ -54,12 +55,34 @@ public class CoursePublishController {
 
 
 	@ApiOperation("查询课程发布信息")
-	@ResponseBody
 	@GetMapping("/r/coursepublish/{courseId}")
 	public CoursePublish getCoursepublish(@PathVariable("courseId") Long courseId) {
 		CoursePublish coursePublish = coursePublishService.getCoursePublish(courseId);
 		return coursePublish;
 	}
 
+
+	//获取课程发布信息
+	@GetMapping("/course/whole/{courseId}")
+	public CoursePreviewDto getCoursePublish(@PathVariable("courseId") Long courseId){
+		CoursePreviewDto coursePreviewDto = new CoursePreviewDto();
+		//查询课程发布表
+		CoursePublish coursePublish = coursePublishService.getCoursePublish(courseId);
+		if(coursePublish == null){
+			return  coursePreviewDto;
+		}
+		//封装CourseBaseInfoDto
+		CourseBaseInfoDto courseBaseInfoDto = new CourseBaseInfoDto();
+		BeanUtils.copyProperties(coursePublish,courseBaseInfoDto);
+		//封装课程计划信息
+		//获取课程信息json
+		String teachplanJson = coursePublish.getTeachplan();
+		//转成List<TeachplanDto>
+		List<TeachplanDto> teachplanDtos = JSON.parseArray(teachplanJson, TeachplanDto.class);
+
+		coursePreviewDto.setCourseBase(courseBaseInfoDto);
+		coursePreviewDto.setTeachplans(teachplanDtos);
+		return coursePreviewDto;
+	}
 
 }
