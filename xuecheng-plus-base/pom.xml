@@ -93,12 +93,7 @@
             <artifactId>spring-amqp</artifactId>
             <scope>provided</scope>
         </dependency>
-        <!--Spring整合Rabbit依赖-->
-        <dependency>
-            <groupId>org.springframework.amqp</groupId>
-            <artifactId>spring-rabbit</artifactId>
-            <scope>provided</scope>
-        </dependency>
+
         <!--json处理-->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -148,6 +143,19 @@
             <artifactId>commons-codec</artifactId>
             <version>1.11</version>
         </dependency>
+
+        <!-- 二维码生成&识别组件 -->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.3.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>3.3.3</version>
+        </dependency>
+
 
     </dependencies>
 </project>
