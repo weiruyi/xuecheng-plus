@@ -16,7 +16,22 @@
         <relativePath/>
     </parent>
 
+    <modules>
+        <module>../xuecheng-plus-base</module>
+        <module>../xuecheng-plus-checkcode</module>
+        <module>../xuecheng-plus-gateway</module>
+        <module>../xuecheng-plus-auth</module>
+        <module>../xuecheng-plus-content</module>
+        <module>../xuecheng-plus-learning</module>
+        <module>../xuecheng-plus-media</module>
+        <module>../xuecheng-plus-orders</module>
+        <module>../xuecheng-plus-message-sdk</module>
+        <module>../xuecheng-plus-search</module>
+        <module>../xuecheng-plus-system</module>
+    </modules>
+
     <properties>
+        <spring-boot.version>2.7.12</spring-boot.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
