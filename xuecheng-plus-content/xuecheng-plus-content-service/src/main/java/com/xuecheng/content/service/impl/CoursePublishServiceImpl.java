@@ -27,6 +27,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
@@ -60,6 +61,8 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 	private MqMessageService mqMessageService;
 	@Autowired
 	private MediaServiceClient mediaServiceClient;
+	@Autowired
+	private RedisTemplate redisTemplate;
 
 	/**
 	 * 获取课程预览信息
@@ -290,5 +293,29 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 	public CoursePublish getCoursePublish(Long courseId){
 		CoursePublish coursePublish = coursePublishMapper.selectById(courseId);
 		return coursePublish;
+	}
+
+	/**
+	 * @description 查询缓存中的课程信息
+	 * @param courseId
+	 * @return com.xuecheng.content.model.po.CoursePublish
+	 */
+	public CoursePublish getCoursePublishCache(Long courseId){
+		String key = "course:" + courseId;
+
+		Object jsonObj = redisTemplate.opsForValue().get(key);
+		if(jsonObj != null){
+			//缓存中有，直接返回
+			String jsonString = jsonObj.toString();
+			CoursePublish coursePublish = JSON.parseObject(jsonString, CoursePublish.class);
+			return coursePublish;
+		}else {
+			//从数据库查询
+			CoursePublish coursePublish = getCoursePublish(courseId);
+			if(coursePublish!=null){
+				redisTemplate.opsForValue().set(key, JSON.toJSONString(coursePublish));
+			}
+			return coursePublish;
+		}
 	}
 }

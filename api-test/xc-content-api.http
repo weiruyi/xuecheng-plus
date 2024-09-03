@@ -64,3 +64,6 @@ POST {{auth_host}}/auth/login-success
 
 ###密码模式
 POST {{auth_host}}/auth/findpassword
+
+###查询课程发布信息
+GET {{gateway_host}}/content/open/course/whole/1
