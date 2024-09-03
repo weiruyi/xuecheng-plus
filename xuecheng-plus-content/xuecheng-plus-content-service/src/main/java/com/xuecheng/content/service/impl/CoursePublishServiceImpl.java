@@ -39,6 +39,8 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -307,15 +309,36 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 		if(jsonObj != null){
 			//缓存中有，直接返回
 			String jsonString = jsonObj.toString();
+			if("null".equals(jsonString)){
+				return null;
+			}
 			CoursePublish coursePublish = JSON.parseObject(jsonString, CoursePublish.class);
 			return coursePublish;
 		}else {
-			//从数据库查询
-			CoursePublish coursePublish = getCoursePublish(courseId);
-			if(coursePublish!=null){
-				redisTemplate.opsForValue().set(key, JSON.toJSONString(coursePublish));
+			//加锁，解决缓存击穿
+			synchronized (this){
+				jsonObj = redisTemplate.opsForValue().get(key);
+				if(jsonObj != null) {
+					//缓存中有，直接返回
+					String jsonString = jsonObj.toString();
+					if ("null".equals(jsonString)) {
+						return null;
+					}
+					CoursePublish coursePublish = JSON.parseObject(jsonString, CoursePublish.class);
+					return coursePublish;
+				}
+
+				//从数据库查询
+				CoursePublish coursePublish = getCoursePublish(courseId);
+//			if(coursePublish!=null){
+//				redisTemplate.opsForValue().set(key, JSON.toJSONString(coursePublish));
+//			}
+				//设置过期时间300秒，如果不存在key在redis中缓存null，
+				//300+new Random().nextInt(100) 使得不同key的过期时间不同，解决缓存雪崩问题
+				redisTemplate.opsForValue().set(key, JSON.toJSONString(coursePublish), 300+new Random().nextInt(100), TimeUnit.MINUTES);
+				return coursePublish;
 			}
-			return coursePublish;
+
 		}
 	}
 }
