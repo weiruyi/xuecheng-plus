@@ -25,6 +25,8 @@ import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -65,6 +67,8 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 	private MediaServiceClient mediaServiceClient;
 	@Autowired
 	private RedisTemplate redisTemplate;
+	@Autowired
+	private RedissonClient redissonClient;
 
 	/**
 	 * 获取课程预览信息
@@ -297,8 +301,53 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 		return coursePublish;
 	}
 
+//	/**
+//	 * @description 查询缓存中的课程信息,使用redisson实现分布式锁
+//	 * @param courseId
+//	 * @return com.xuecheng.content.model.po.CoursePublish
+//	 */
+//	public CoursePublish getCoursePublishCache(Long courseId){
+//		String key = "course:" + courseId;
+//
+//		Object jsonObj = redisTemplate.opsForValue().get(key);
+//		if(jsonObj != null){
+//			//缓存中有，直接返回
+//			String jsonString = jsonObj.toString();
+//			if("null".equals(jsonString)){
+//				return null;
+//			}
+//			CoursePublish coursePublish = JSON.parseObject(jsonString, CoursePublish.class);
+//			return coursePublish;
+//		}else {
+//			//加锁，解决缓存击穿
+//			synchronized (this){
+//				jsonObj = redisTemplate.opsForValue().get(key);
+//				if(jsonObj != null) {
+//					//缓存中有，直接返回
+//					String jsonString = jsonObj.toString();
+//					if ("null".equals(jsonString)) {
+//						return null;
+//					}
+//					CoursePublish coursePublish = JSON.parseObject(jsonString, CoursePublish.class);
+//					return coursePublish;
+//				}
+//
+//				//从数据库查询
+//				CoursePublish coursePublish = getCoursePublish(courseId);
+////			if(coursePublish!=null){
+////				redisTemplate.opsForValue().set(key, JSON.toJSONString(coursePublish));
+////			}
+//				//设置过期时间300秒，如果不存在key在redis中缓存null，
+//				//300+new Random().nextInt(100) 使得不同key的过期时间不同，解决缓存雪崩问题
+//				redisTemplate.opsForValue().set(key, JSON.toJSONString(coursePublish), 300+new Random().nextInt(100), TimeUnit.MINUTES);
+//				return coursePublish;
+//			}
+//
+//		}
+//	}
+
 	/**
-	 * @description 查询缓存中的课程信息
+	 * @description 查询缓存中的课程信息,使用redisson实现分布式锁
 	 * @param courseId
 	 * @return com.xuecheng.content.model.po.CoursePublish
 	 */
@@ -316,7 +365,11 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 			return coursePublish;
 		}else {
 			//加锁，解决缓存击穿
-			synchronized (this){
+			//获取分布式锁
+			RLock lock = redissonClient.getLock("courseQueryLock:" + courseId);
+			lock.lock();
+//			log.info("courseQueryLock:{}",courseId);
+			try{
 				jsonObj = redisTemplate.opsForValue().get(key);
 				if(jsonObj != null) {
 					//缓存中有，直接返回
@@ -337,7 +390,11 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 				//300+new Random().nextInt(100) 使得不同key的过期时间不同，解决缓存雪崩问题
 				redisTemplate.opsForValue().set(key, JSON.toJSONString(coursePublish), 300+new Random().nextInt(100), TimeUnit.MINUTES);
 				return coursePublish;
+			} finally {
+				lock.unlock();
 			}
+
+
 
 		}
 	}
